@@ -53,12 +53,16 @@ Defining a form is a two-step process:
   
 *[macro]* `deform name nil field-definitions`
 
-  The syntax for FIELD-DEFINITIONS is: `(field-name validator-function)`.
+  The syntax for FIELD-DEFINITIONS is: `(field-name validator-function &rest validator-args)`.
   
   VALIDATOR-FUNCTION can be any function that receives one argument (which will be the 'raw' value
   for the field -- in most cases a plain string). This function should return a validater, processed
   value to be returned by `field-value`.
   
+  Additionally, VALIDATOR-ARGS can be provided to each individual field. These will be applied,
+  after the raw field value, to the validator function. To clarify, (:field-name #'list 1 2 3) will
+  result in (<raw-value> 1 2 3) being returned by the 'validator'.
+
   FIELD-NAME can be either a symbol (which names the field), or a literal list containing a symbol
   and one of the symbols `LIST` or `ARRAY`.
   
