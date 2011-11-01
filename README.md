@@ -9,18 +9,23 @@ well as providing values that web forms can be repopulated with.
       value)
 
     (defun as-integer (value &aux *read-eval*)
-      (let ((int (ignore-some-conditions (parse-error)
-                   (parse-integer val))))
-        (check-field int "~A is not a valid integer." val)
-        ;; Validators must return the final, intended field value.
-        int))
+      (check-field (every #'digit-char-p value) "~A is not a valid integer." value)
+      ;; Validators must return the final, intended field value.
+      (parse-integer value))
+
+    (defun field-length (value &key min-length max-length)
+      (when min-length
+        (check-field (>= (length value) min-length) "Field must be at least ~A characters long." min-length))
+      (when max-length
+        (check-field (<= (length value) max-length) "Field must be ~A characters long or shorter." max-length))
+      value)
 
     (deform test-form ()
-      ((:whatever #'identity)
+      ((:whatever #'field-length :min-length 1)
        (:error-field 'always-error)
-       (:int-field 'as-int)
+       (:int-field 'as-integer)
        ((:my-list list) (lambda (val)
-                          (mapcar #'as-int val)))
+                          (mapcar #'as-integer val)))
        ((:my-array array) (lambda (val)
                             (remove nil val)))))
 
